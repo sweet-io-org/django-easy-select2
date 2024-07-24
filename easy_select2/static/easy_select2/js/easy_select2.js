@@ -68,6 +68,7 @@ if (window.$ == undefined) {
 
 // The edit distance will be biased towards shorter strings, so we need to strengthen the effect of an actual match
 const PHRASE_MULTIPLIER = 0.6;
+const PLACEHOLDER_PATTERN = /^-+$/;
 
 /**
  * $ - external JQuery ref
@@ -104,14 +105,23 @@ const PHRASE_MULTIPLIER = 0.6;
 
         sorted.sort(function (first, second) {
             const normalizedFirst = first.text.toLowerCase();
-            var distanceFirst = editDistance(normalizedFirst, recentSearchTerm);
-            if (normalizedFirst.indexOf(recentSearchTerm) >= 0) {
-                distanceFirst = distanceFirst * PHRASE_MULTIPLIER;
+            if (PLACEHOLDER_PATTERN.test(normalizedFirst)) {
+                // Keep the cursor at the top of the list
+                var distanceFirst = 0;
+            } else {
+                var distanceFirst = editDistance(normalizedFirst, recentSearchTerm);
+                if (normalizedFirst.indexOf(recentSearchTerm) >= 0) {
+                    distanceFirst = distanceFirst * PHRASE_MULTIPLIER;
+                }
             }
             const normalizedSecond = second.text.toLowerCase()
-            var distanceSecond = editDistance(normalizedSecond, recentSearchTerm);
-            if (normalizedSecond.indexOf(recentSearchTerm) >= 0) {
-                distanceSecond = distanceSecond * PHRASE_MULTIPLIER;
+            if (PLACEHOLDER_PATTERN.test(normalizedSecond)) {
+                var distanceSecond = 0;
+            } else {
+                var distanceSecond = editDistance(normalizedSecond, recentSearchTerm);
+                if (normalizedSecond.indexOf(recentSearchTerm) >= 0) {
+                    distanceSecond = distanceSecond * PHRASE_MULTIPLIER;
+                }
             }
             return distanceFirst - distanceSecond;
         });
