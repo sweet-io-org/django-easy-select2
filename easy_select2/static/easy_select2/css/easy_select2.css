@@ -1,3 +1,7 @@
 ul.select2-selection__rendered li {
     list-style-type: none;
 }
+
+tbody span.select2-container {
+    min-width: 100%
+}
