@@ -6,7 +6,7 @@ function getCacheKey(a, b) {
   return `${a}∪${b}`;
 }
 
-function editDistance (a, b) {
+function normalizedEditDistance (a, b) {
   if (!a || !b) {
     return Infinity;
   }
@@ -16,6 +16,7 @@ function editDistance (a, b) {
   }
 
   if (a.length > b.length) {
+      // a will be shorter
     [a, b] = [b, a]
   }
   const scores = new Array(a.length + 1)
@@ -38,15 +39,18 @@ function editDistance (a, b) {
       prevScore = _prevScore
     }
   }
-  const result = scores[a.length]
+  var result = scores[a.length] / (b.length || 1)**3 // Avoid ∞
+  if (!!a && !!b && b.indexOf(a) >= 0) {
+      result = result * PHRASE_MULTIPLIER;
+  }
   editDistanceCache[cacheKey] = result;
   return result;
 }
 
 // Check if the external library is loaded
-if (typeof editDistance !== 'undefined') {
+if (typeof normalizedEditDistance !== 'undefined') {
     // Attach functions to the window object
-    window.editDistance = editDistance;
+    window.editDistance = normalizedEditDistance;
     // Add other functions if needed
     // window.otherFunction = levenshtein.otherFunction;
 } else {
@@ -67,7 +71,7 @@ if (window.$ == undefined) {
 }
 
 // The edit distance will be biased towards shorter strings, so we need to strengthen the effect of an actual match
-const PHRASE_MULTIPLIER = 0.6;
+const PHRASE_MULTIPLIER = 0.25;
 const PLACEHOLDER_PATTERN = /^-+$/;
 
 /**
@@ -104,24 +108,19 @@ const PLACEHOLDER_PATTERN = /^-+$/;
         var sorted = results.slice(0);
 
         sorted.sort(function (first, second) {
+            var matched = false;
             const normalizedFirst = first.text.toLowerCase();
             if (PLACEHOLDER_PATTERN.test(normalizedFirst)) {
                 // Keep the cursor at the top of the list
                 var distanceFirst = 0;
             } else {
-                var distanceFirst = editDistance(normalizedFirst, recentSearchTerm);
-                if (normalizedFirst.indexOf(recentSearchTerm) >= 0) {
-                    distanceFirst = distanceFirst * PHRASE_MULTIPLIER;
-                }
+                var distanceFirst = normalizedEditDistance(normalizedFirst, recentSearchTerm);
             }
             const normalizedSecond = second.text.toLowerCase()
             if (PLACEHOLDER_PATTERN.test(normalizedSecond)) {
                 var distanceSecond = 0;
             } else {
-                var distanceSecond = editDistance(normalizedSecond, recentSearchTerm);
-                if (normalizedSecond.indexOf(recentSearchTerm) >= 0) {
-                    distanceSecond = distanceSecond * PHRASE_MULTIPLIER;
-                }
+                var distanceSecond = normalizedEditDistance(normalizedSecond, recentSearchTerm);
             }
             return distanceFirst - distanceSecond;
         });
