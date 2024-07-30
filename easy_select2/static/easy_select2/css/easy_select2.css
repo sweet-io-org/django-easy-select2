@@ -5,3 +5,44 @@ ul.select2-selection__rendered li {
 tbody span.select2-container {
     min-width: 100%
 }
+
+/* Here we overwrite the Select2 settings with Django-specific settings, ensuring that darkmode is supported. */
+.select2-dropdown {
+  background-color: var(--body-bg);
+}
+
+.select2-close-mask {
+    color: var(--body-bg);
+}
+
+.select2-container--default .select2-selection--single {
+    background-color: var(--body-bg);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--body-fg);
+}
+
+.select2-container--default .select2-selection--multiple {
+    background-color: var(--body-bg);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+     color: var(--body-bg);
+}
+
+.select2-container--classic .select2-selection--single .select2-selection__rendered {
+    color: var(--body-fg);
+}
+
+.select2-container--classic .select2-selection--multiple {
+    background-color: var(--body-bg);
+}
+
+.select2-container--classic .select2-dropdown {
+    background-color: var(--body-bg);
+}
+
+.select2-container--classic .select2-results__option--highlighted[aria-selected] {
+    color: var(--body-bg);
+}
